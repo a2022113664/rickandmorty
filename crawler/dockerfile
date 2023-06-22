@@ -1,0 +1,15 @@
+# Use a Python base image
+FROM python:3.9-slim
+
+# Defina o diretório de trabalho como /app
+WORKDIR /app
+
+# Copie os arquivos necessários para o diretório de trabalho
+COPY requirements.txt .
+COPY crawler.py .
+
+# Instale as dependências
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Execute o crawler.py quando o container for iniciado
+CMD ["python", "crawler.py"]
