@@ -3,42 +3,48 @@ import mysql.connector
 
 # Conexão com o banco de dados
 conn = mysql.connector.connect(
-    host='localhost',
+    host='172.17.0.2',
     user='root',
     password='almeidapewpew',
     database='db_test'
 )
 c = conn.cursor()
 
-# Obter personagens
-url = 'https://rickandmortyapi.com/api/character'
-response = requests.get(url)
-data = response.json()
-personagens = data['results']
-
 # Criar tabela de personagens
 c.execute('''CREATE TABLE IF NOT EXISTS personagens
               (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255))''')
 
-# Inserir nomes dos personagens na tabela
-for personagem in personagens:
-    nome = personagem['name']
-    c.execute("INSERT INTO personagens (nome) VALUES (%s)", (nome,))
+# Obter personagens
+url = 'https://rickandmortyapi.com/api/character'
+while url:
+    response = requests.get(url)
+    data = response.json()
+    personagens = data['results']
 
-# Obter locais
-url_locations = 'https://rickandmortyapi.com/api/location'
-response_locations = requests.get(url_locations)
-data_locations = response_locations.json()
-locations = data_locations['results']
+    # Inserir nomes dos personagens na tabela
+    for personagem in personagens:
+        nome = personagem['name']
+        c.execute("INSERT INTO personagens (nome) VALUES (%s)", (nome,))
 
-# Criar tabela de locais
+    url = data['info']['next']
+
+# Criar tabela de locations
 c.execute('''CREATE TABLE IF NOT EXISTS locations
               (id INT AUTO_INCREMENT PRIMARY KEY, nome VARCHAR(255))''')
 
-# Inserir nomes dos locais na tabela
-for location in locations:
-    nome = location['name']
-    c.execute("INSERT INTO locations (nome) VALUES (%s)", (nome,))
+# Obter locations
+url = 'https://rickandmortyapi.com/api/location'
+while url:
+    response = requests.get(url)
+    data = response.json()
+    locations = data['results']
+
+    # Inserir nomes das locations na tabela
+    for location in locations:
+        nome = location['name']
+        c.execute("INSERT INTO locations (nome) VALUES (%s)", (nome,))
+
+    url = data['info']['next']
 
 # Salvar alterações e fechar conexão
 conn.commit()
